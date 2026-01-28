@@ -8,19 +8,21 @@ from dataset import get_dataloader
 
 def train():
     # Гиперпараметры
-    batch_size = 16
-    seq_len = 64
+    batch_size = 32
+    seq_len = 128
     d_model = 512
-    epochs = 10
-    learning_rate = 1e-4
+    epochs = 200
+    learning_rate = 5e-5
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Инициализация модели и данных
     model = MedicalDiffusionModel(d_model=d_model, max_seq_len=seq_len).to(device)
-    dataloader = get_dataloader(batch_size=batch_size)
+    dataloader = get_dataloader(data_path="expanded_medical_dataset.csv", batch_size=batch_size, max_length=seq_len)
     
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-2)
     mse_loss = nn.MSELoss()
+    
+    best_loss = float('inf')
 
     print(f"Starting training on {device}...")
 
@@ -62,10 +64,16 @@ def train():
             optimizer.step()
             
             pbar.set_postfix({"loss": f"{loss.item():.4f}"})
+        
+        # Сохранение лучшей версии
+        avg_loss = loss.item()
+        if avg_loss < best_loss:
+            best_loss = avg_loss
+            torch.save(model.state_dict(), "medical_diffusion_best.pt")
 
-    # Сохранение модели
+    # Финальное сохранение
     torch.save(model.state_dict(), "medical_diffusion.pt")
-    print("Training complete. Model saved.")
+    print(f"Training complete. Best loss: {best_loss:.4f}. Model saved.")
 
 if __name__ == "__main__":
     train()

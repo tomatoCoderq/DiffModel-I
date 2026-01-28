@@ -39,6 +39,7 @@ class MedicalDiffusionModel(nn.Module):
                 noise = 0
                 
             x = (1 / torch.sqrt(alpha)) * (x - ((1 - alpha) / torch.sqrt(1 - alpha_cumprod)) * noise_pred) + torch.sqrt(beta) * noise
+            x = torch.clamp(x, -5, 5) # Стабилизация эмбеддингов
             
         return x
 

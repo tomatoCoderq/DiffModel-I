@@ -41,7 +41,7 @@ class MedicalDataset(Dataset):
 
 import pandas as pd
 
-def get_dataloader(data_path="medical_dataset.csv", batch_size=32):
+def get_dataloader(data_path="medical_dataset.csv", batch_size=32, max_length=128):
     # Загружаем данные из CSV файла
     try:
         df = pd.read_csv(data_path)
@@ -63,7 +63,7 @@ def get_dataloader(data_path="medical_dataset.csv", batch_size=32):
             "Migraine or Increased Intracranial Pressure"
         ] * 25
 
-    dataset = MedicalDataset(texts, diagnoses)
+    dataset = MedicalDataset(texts, diagnoses, max_length=max_length)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":

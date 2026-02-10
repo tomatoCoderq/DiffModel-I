@@ -1,6 +1,7 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
+
 
 class MedicalDataset(Dataset):
     def __init__(self, texts, diagnoses, tokenizer_name="bert-base-uncased", max_length=128):
@@ -16,19 +17,18 @@ class MedicalDataset(Dataset):
         text = self.texts[idx]
         diagnosis = self.diagnoses[idx]
 
-        # Токенизация клинической заметки
         text_enc = self.tokenizer(
-            text, 
-            max_length=self.max_length, 
-            padding="max_length", 
-            truncation=True, 
+            text,
+            max_length=self.max_length,
+            padding="max_length",
+            truncation=True,
             return_tensors="pt"
         )
-        
-        # Токенизация диагноза (для условия)
+
+        # Мы ограничиваем условие 32 токенами, потому что диагноз короче основной заметки
         diag_enc = self.tokenizer(
             diagnosis,
-            max_length=32, # Диагноз обычно короче
+            max_length=32,
             padding="max_length",
             truncation=True,
             return_tensors="pt"
@@ -41,15 +41,16 @@ class MedicalDataset(Dataset):
 
 import pandas as pd
 
+
 def get_dataloader(data_path="medical_dataset.csv", batch_size=32, max_length=128):
-    # Загружаем данные из CSV файла
+    # Мы загружаем CSV, но поддерживаем резервные данные, чтобы обучение не останавливалось
     try:
         df = pd.read_csv(data_path)
         texts = df['clinical_note'].tolist()
         diagnoses = df['diagnosis'].tolist()
     except Exception as e:
         print(f"Ошибка при загрузке {data_path}: {e}. Используем фиктивные данные.")
-        # Фиктивные данные в случае ошибки
+        # Мы формируем базовые записи, чтобы pipeline всегда имел вход
         texts = [
             "Patient presents with acute chest pain and shortness of breath.",
             "Follow-up for chronic hypertension and type 2 diabetes management.",

@@ -1,6 +1,10 @@
 medical_diffusion.pt
+medical_diffusion_best.pt
 __pycache__/
 .idea/
 .venv/
 *.pyc
 medical_dataset.csv
+training_ipc.sqlite
+training_ipc.sqlite-shm
+training_ipc.sqlite-wal

@@ -1,7 +1,8 @@
-import pandas as pd
 import random
 
-# Базовые шаблоны для генерации расширенного датасета
+import pandas as pd
+
+# Мы задаем шаблоны, чтобы расширять датасет синтетическими описаниями
 diagnoses_templates = {
     "Acute Coronary Syndrome": [
         "Patient presents with {severity} chest pain radiations to the {radiation}, shortness of breath, and {symptom}.",
@@ -57,23 +58,20 @@ data_options = {
 
 def generate_expanded_dataset(count=512):
     dataset = []
-    
-    # Сначала добавим оригинальные данные
+
     original_df = pd.read_csv("medical_dataset.csv")
     for _, row in original_df.iterrows():
         dataset.append({"diagnosis": row["diagnosis"], "clinical_note": row["clinical_note"]})
-    
-    # Генерируем новые записи
+
     for _ in range(count - len(dataset)):
         diag = random.choice(list(diagnoses_templates.keys()))
         template = random.choice(diagnoses_templates[diag])
-        
-        # Заполняем шаблон случайными значениями
+
         params = {k: random.choice(v) for k, v in data_options.items()}
         note = template.format(**params)
-        
+
         dataset.append({"diagnosis": diag, "clinical_note": note})
-        
+
     df = pd.DataFrame(dataset)
     df.to_csv("expanded_medical_dataset.csv", index=False)
     print(f"Generated {len(df)} records in expanded_medical_dataset.csv")
